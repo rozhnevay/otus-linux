@@ -27,6 +27,36 @@
     mount -o remount,rw /sysroot
     reboot
 ```
+### **Установить систему с LVM, после чего переименовать VG** 
+Подготовим раздел
+
+    pvcreate /dev/sdb
+    vgcreate vg /dev/sdb
+    lvcreate -n lv -l +100%FREE /dev/vg
+
+Примонтируем, создадим файл
+```
+    mkfs.xfs /dev/vg_root/lv_root
+    mount /dev/vg/lv /mnt
+    touch mnt/file
+```
+Переименуем VG
+```
+    [root@otuslinux mnt]# vgrename vg vg_renamed
+     Volume group "vg" successfully renamed to "vg_renamed"
+```
+Проверяем файл
+```
+    [root@otuslinux mnt]# ll
+    total 0
+    -rw-r--r--. 1 root root 0 Jun  3 07:07 file
+```
+Файл на месте, VG переименована
+```
+    [root@otuslinux mnt]# vgs
+      VG         #PV #LV #SN Attr   VSize   VFree
+      vg_renamed   1   1   0 wz--n- 248.00m    0
+```
 ### **Добавить модуль в initrd** 
 Добавляем модуль
 ```
