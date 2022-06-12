@@ -1,7 +1,7 @@
 # **Homework 9**
 
+Сначала подготовим команды по-отдельности, а затем объединим в скрипт
 ### **X IP адресов (с наибольшим кол-вом запросов) с указанием кол-ва запросов c момента последнего запуска скрипта**
-Prepare command
 ```bash
     cat access-4560-644067.log | cut -f 1 -d ' ' | sort | uniq -c | sort -rn | head -n 10
 ```
@@ -20,7 +20,7 @@ Prepare command
      cat access-4560-644067.log | cut -f 9 -d ' ' | grep "[1-5].." | sort | uniq -c
 ```
 
-Создадим скрипт для чтения файла /usr/local/bin/otus-log.sh
+Создадим скрипт /usr/local/bin/otus-log.sh
 ```bash
     cat <<-"EOF" > /usr/local/bin/otus-log.sh
 #!/usr/bin/env bash
@@ -44,7 +44,7 @@ EOF
 ```
     chmod o+x /usr/local/bin/otus-log.sh
 ```
-Execute
+Выполняем, убеждаемся что нужные файлы создались
 ```
 [root@oracle-linux ~]# bash /usr/local/bin/otus-log.sh access-4560-644067.log 10 10
 [root@oracle-linux ~]# cd /tmp
@@ -59,7 +59,7 @@ drwx------. 3 root root     17 May  2 18:51 systemd-private-390abdd4550f41ea9386
 -rw-r--r--. 1 root root    265 Jun 12 09:36 y.log
 
 ```
-Set up email
+Настраиваем отправку e-mail
 ```
     cat <<-"EOF" >> /etc/postfix/main.cf 
 relayhost = xxx.xxx.xxx:25
@@ -72,14 +72,14 @@ smtp_sasl_tls_verified_security_options =
 EOF
 ```
 
-Sending test letter with attachments
+Проверяем отправку письма с вложениями
 ```
     mail -s "hello" -a /tmp/x.log -a /tmp/y.log "admin@xxx.ru"<<EOF
 hello
 world
 EOF
 ```
-Check command for extracting timestamps from file
+Готовим команду, котора будет преобразовывать время и дату из log файла в формат UNIX timestamp
 ```
     cat access.log | grep -E -o "[0-9]{2}\/[a-Z]*.*\+0300" | sed -e 's/\// /g'|sed -e 's/:/ /'|xargs -I mydate date -d "mydate" +%s
 ```
@@ -91,8 +91,8 @@ Check command for extracting timestamps from file
 1565746717
 1565747828
 ```
-awk -vDate=`date -d'1565820000' +[%d/%b/%Y:%H:%M:%S` '$4 > Date {print Date, $0}'
-Add it as function in our script
+Добавляем функцию filter в наш скрипт
+Также добавляем отправку письма
 ```bash
     cat <<-"EOF" > /usr/local/bin/otus-log.sh
 #!/usr/bin/env bash
@@ -136,8 +136,9 @@ echo $NOW_TS  >"$LOG_POS_FILE"
 exit 0
 EOF
 ```
+Вызываем, проверяем, что письмо пришло, необходимая инфа в теле письма присутствует:
 ![Alt text](s1.png)
-X1:
+Содержимое файла x.log:
 ```
      45 93.158.167.130
      39 109.236.252.130
@@ -150,25 +151,23 @@ X1:
      17 217.118.66.161
      16 95.165.18.146
 ```
-add line in future:
+Добавляем в log файл строку из будущего:
 ```
     echo '182.254.243.249 - - [15/Aug/2022:00:24:38 +0300] "GET /webdav/ HTTP/1.1" 404 3652 "-" "Mozilla/5.0"rt=0.222 uct="-" uht="-" urt="-"' >> access-4560-644067.log
 ```
-rerun and check X1:
+Перезапускаем и видим, что фильтрация по интервалу сработала:
 ```
    1 182.254.243.249
 ```
 
-CRON:
-
+Добавляем скриптик в crontab:
 ```
     crontab -e
 ```
 ```
     */5 * * * * /usr/local/bin/otus-log.sh
 ```
-
-Trapping:
+Добавляем trap для контроля мультизапуска - через lock-файл
 ```
     LOCKFILE=/tmp/otus_lockfile
 
@@ -180,6 +179,8 @@ Trapping:
     touch $LOCKFILE
     trap 'rm $LOCKFILE' EXIT
 ```
+
+Итоговый скрипт:
 ```bash
     cat <<-"EOF" > /usr/local/bin/otus-log.sh
 #!/usr/bin/env bash
