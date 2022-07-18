@@ -17,7 +17,17 @@ cd prometheus*/
 ./prometheus
 ```
 Проверяем в браузере, видим, что доступна
-![Alt text](Screenshot 2022-07-17 at 13.20.32.png)
+![Alt text](1.png)
+Также установим и запустим node_exporter + перезапустим prometheus со следующим конфигом:
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: node
+  static_configs:
+  - targets: ['localhost:9100']
+```
 Установим grafana
 Добавим репо
 ```shell
@@ -51,9 +61,9 @@ systemctl status grafana-server.service
    Active: active (running) since Sun 2022-07-17 11:25:25 MSK; 18s ago
 ```
 Проверим из браузера
-![Alt text](Screenshot 2022-07-17 at 13.26.30.png)
+![Alt text](2.png)
 Добвляем prometheus как datasource, и настраиваем dashboard:
-![img.png](Screenshot 2022-07-18 at 09.39.27.png)
+![img.png](3.png)
 
 На дашборде 4 графика:
 1 - доступное место на диске (в байтах)
