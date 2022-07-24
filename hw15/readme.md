@@ -16,15 +16,11 @@ passwd: all authentication tokens updated successfully.
 ```
 Отредактируем /etc/security/time.conf, добавим туда
 ```shell
-*;*;weekdays;Wd
+*;*;!admin;!Wd
 ```
 Добавим в /etc/pam.d/sshd:
 ```shell
 account    required     pam_time.so
-```
-Сегодня воскресенье. Попробуем подключиться под weekdays:
-```shell
-*;*;!admin;!Wd
 ```
 Подключимся под weekdays и видим, что нас не пускает:
 ```shell
