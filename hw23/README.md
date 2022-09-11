@@ -123,6 +123,7 @@ acl client2 { !key client-key; key client2-key; 192.168.50.16; };
 информацию с сервера ns01
 
 Проверка на client:
+```shell
 [root@client ~]# ping www.newdns.lab
 PING www.newdns.lab (192.168.50.15) 56(84) bytes of data.
 64 bytes from client (192.168.50.15): icmp_seq=1 ttl=64 time=0.014 ms
@@ -157,3 +158,4 @@ rtt min/avg/max/mdev = 0.809/0.809/0.809/0.000 ms
 PING web2.dns.lab (192.168.50.16) 56(84) bytes of data.
 64 bytes from client2 (192.168.50.16): icmp_seq=1 ttl=64 time=0.037 ms
 64 bytes from client2 (192.168.50.16): icmp_seq=2 ttl=64 time=0.065 ms
+```
